@@ -1,13 +1,12 @@
 [databases]
 * = host=localhost user=postgres
 [pgbouncer]
-process_count = 2
 logfile = /var/log/pgbouncer/pgbouncer.log
 pidfile = /var/run/pgbouncer/pgbouncer.pid
 listen_addr = 127.0.0.1
 listen_port = 6432
 auth_type = trust
-auth_file = /home/liuyangming/pgbouncers/etc/userlist.txt
+auth_file = /home/pgbouncer/pgbouncer/etc/userlist.txt
 admin_users = postgres
 stats_users = stats,postgres
 pool_mode = session

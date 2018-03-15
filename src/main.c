@@ -93,6 +93,8 @@ char *cf_auth_hba_file;
 char *cf_auth_user;
 char *cf_auth_query;
 
+int cf_process_count; /* process count of pgbouncer*/
+
 int cf_max_client_conn;
 int cf_default_pool_size;
 int cf_min_pool_size;
@@ -219,6 +221,7 @@ CF_ABS("auth_user", CF_STR, cf_auth_user, 0, NULL),
 CF_ABS("auth_query", CF_STR, cf_auth_query, 0, "SELECT usename, passwd FROM pg_shadow WHERE usename=$1"),
 CF_ABS("pool_mode", CF_LOOKUP(pool_mode_map), cf_pool_mode, 0, "session"),
 CF_ABS("max_client_conn", CF_INT, cf_max_client_conn, 0, "100"),
+CF_ABS("process_count", CF_INT, cf_process_count, 0, "1"),
 CF_ABS("default_pool_size", CF_INT, cf_default_pool_size, 0, "20"),
 CF_ABS("min_pool_size", CF_INT, cf_min_pool_size, 0, "0"),
 CF_ABS("reserve_pool_size", CF_INT, cf_res_pool_size, 0, "0"),
@@ -932,8 +935,8 @@ int main(int argc, char *argv[])
 
 	write_pidfile();
 
-	log_info("process up: %s, libevent %s (%s), adns: %s, tls: %s", PACKAGE_STRING,
-		 event_get_version(), event_get_method(), adns_get_backend(),
+	log_info("process up: %s, process count: %d, libevent %s (%s), adns: %s, tls: %s", PACKAGE_STRING,
+		 cf_process_count, event_get_version(), event_get_method(), adns_get_backend(),
 		 tls_backend_version());
 
 	/* main loop */
