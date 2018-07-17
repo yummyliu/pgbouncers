@@ -1,37 +1,31 @@
-FROM centos:7 AS build_stage
-
+FROM alpine:3.7
 MAINTAINER Yummyliu <sdwhlym@126.com>
 
-# all the apt-gets in one command & delete the cache after installing
+WORKDIR /pgbouncers
+ADD . /pgbouncers
 
-# Install build dependencies
-RUN yum update \
-    && yum install -y \
-       build-essential libevent-dev ca-certificates curl git
+# Inspiration from https://github.com/gmr/alpine-pgbouncer/blob/master/Dockerfile
+#RUN groupadd -r pgbouncer && useradd -r -g pgbouncer pgbouncer
 
+RUN \
+  # Download
+  apk --update add autoconf autoconf-doc automake c-ares c-ares-dev curl gcc libc-dev libevent libevent-dev libtool make man libressl-dev pkgconfig &&\
+  cd /pgbouncers && \
+  ./configure --prefix=/usr && \
+  make && \
+
+  # Manual install
+  cp pgbouncer /usr/bin && \
+  mkdir -p /etc/pgbouncer /var/log/pgbouncer /var/run/pgbouncer && \
+  # entrypoint installs the configuation, allow to write as postgres user
+  cp etc/pgbouncer.ini /etc/pgbouncer/pgbouncer.ini.example && \
+  cp etc/userlist.txt /etc/pgbouncer/userlist.txt.example && \
+  chown -R postgres /var/run/pgbouncer /etc/pgbouncer && \
+  # Cleanup
+  cd /tmp && \
+  rm -rf /tmp/pgbouncer*  && \
+  apk del --purge autoconf autoconf-doc automake c-ares-dev curl gcc libc-dev libevent-dev libtool make man libressl-dev pkgconfig
+
+USER postgres
 EXPOSE 5432
-
-RUN groupadd -r pgbouncer && useradd -r -g pgbouncer pgbouncer
-
-# ENV PGBOUNCER_URL http://pgbouncer.github.io/downloads/files/${PGBOUNCER_VERSION}/pgbouncer-${PGBOUNCER_VERSION}.tar.gz
-# ENV PGBOUNCER_VERSION 1.8.1
-ENV PGBOUNCER_URL https://github.com/yummyliu/pgbouncers.git
-
-# Get PgBouncer source code
-RUN git clone --depth=1 ${PGBOUNCER_URL} \
-  && chown root:root pgbouncers
-
-# Configure, make, and install
-RUN cd pgbouncers \
-  && ./configure --prefix=/usr/local --with-libevent=libevent-prefix \
-  && make \
-  && make install
-
-ADD pgbouncer.ini /var/app/pgbouncer/pgbouncer.ini
-ADD auth_file.ini /var/app/pgbouncer/auth_file.ini
-
-RUN chown pgbouncer:pgbouncer /var/app/pgbouncer/ -R \
-     && chmod a+w /var/log -R \
-    && chmod a+w /var/run -R
-
-CMD pgbouncer /var/app/pgbouncer/pgbouncer.ini
+CMD ["/usr/bin/pgbouncer", "/etc/pgbouncer/pgbouncer.ini"]
