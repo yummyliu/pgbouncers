@@ -1,3 +1,2 @@
-"postgres" "aasdlf"
+"postgres" "123"
 "stats" "asdf"
-"liuyangming" "md548cf1e414b41c5377dd2a4621caa6a55"

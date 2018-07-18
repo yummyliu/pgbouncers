@@ -51,7 +51,7 @@ AM_FEATURES = libusual
 pgbouncer_EMBED_LIBUSUAL = 1
 
 # docs to install as-is
-dist_doc_DATA = README.rst NEWS.rst etc/pgbouncer.ini etc/userlist.txt
+dist_doc_DATA = NEWS.rst etc/pgbouncer.ini etc/userlist.txt
 
 DISTCLEANFILES = config.mak config.status lib/usual/config.h config.log
 
