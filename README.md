@@ -1,5 +1,4 @@
-PgBouncers
-=========
+# PgBouncers
 
 Lightweight connection pooler for PostgreSQL.
 
@@ -9,8 +8,7 @@ Homepage
 Sources, bugtracking
     https://github.com/pgbouncer/pgbouncer
 
-Building
----------
+## Building
 
 PgBouncer depends on few things to get compiled:
 
@@ -30,11 +28,10 @@ When dependencies are installed just run::
     $ make
     $ make install
 
-If you are building from git, or are building for Windows, please see 
+If you are building from git, or are building for Windows, please see
 separate build instructions below.
 
-DNS lookup support
-------------------
+## DNS lookup support
 
 Starting from PgBouncer 1.4, it does hostname lookups at connect
 time instead just once at config load time.  This requires proper
@@ -64,14 +61,12 @@ and their probing order:
 `./configure` also has flags `--enable-evdns` and `--disable-evdns` which
 turn off automatic probing and force use of either `evdns` or `getaddrinfo_a()`.
 
-PAM authorization
------------------
+## PAM authorization
 
 To enable PAM authorization `./configure` has a flag `--with-pam` (default value is no). When compiled with
 PAM support new global authorization type `pam` appears which can be used to validate users through PAM.
 
-Building from GIT
------------------
+## Building from GIT
 
 Building PgBouncer from GIT requires that you fetch libusual
 submodule and generate the header and config files before
@@ -89,8 +84,7 @@ you can run configure::
 Additional packages required: autoconf, automake, libevent-dev, libtool,
 autoconf-archive, python-docutils, and pkg-config.
 
-Building for WIN32
-------------------
+## Building for WIN32
 
 At the moment only build env tested is MINGW32 / MSYS.  Cygwin
 and Visual $ANYTHING are untested.  Libevent 2.x is required
@@ -105,8 +99,7 @@ If cross-compiling from Unix::
 
 	$ ./configure --host=i586-mingw32msvc ...
 
-Running on WIN32
-----------------
+## Running on WIN32
 
 Running from command-line goes as usual, except -d (daemonize),
 -R (reboot) and -u (switch user) switches will not work.
@@ -126,6 +119,34 @@ But before you need to register pgbevent.dll::
 	$ regsvr32 pgbevent.dll
 
 To unregister it, do::
-    
+
         $ regsvr32 /u pgbevent.dll
 
+# Docker Usage
+This is yet another docker image with pgbouncer, based on alpine.
+
+Code Example
+You can configure it by Environment variables:
+
+$ docker run -d \
+ --name=pgbouncer \
+ -e DB_HOST=postgresql.example.com \
+ -e DB_USER=admin \
+ -e DB_PASSWORD=mypassword \
+ brainsam/pgbouncer:latest
+Or You can mount config file into docker container:
+
+$ docker run -d \
+ --name pgbouncer \
+ -v pgbouncer-config-file:/etc/pgbouncer/pgbouncer.ini \
+ brainsam/pgbouncer:latest
+Installation
+$ docker pull brainsam/pgbouncer:latest
+Configuration
+All configuration parameters of pgbouncer are available both by --env (use the same keys in upper case) and by mounting pgbouncer.ini into container.
+
+Troubleshooting
+docker logs <your-pgbouncer-container-name>
+
+# debug
+docker run -d -p 6432:6432 --name pgbouncers -e DB_HOST=172.17.0.2 -e DB_USER=postgres -e DB_PASSWORD=123 pgbouncers:latest
