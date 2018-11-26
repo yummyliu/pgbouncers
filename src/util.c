@@ -442,4 +442,41 @@ const char *pga_details(const PgAddr *a, char *dst, int dstlen)
 }
 
 
+static char *pgb_os_argv_last;
 
+void
+pgb_setproctitle(const char *title)
+{
+    u_char     *p;
+
+    pgb_os_argv[1] = NULL;
+
+    p = pgb_cpystrn((u_char *) pgb_os_argv[0], (u_char *) title, pgb_os_argv_last - pgb_os_argv[0]);
+
+    if (pgb_os_argv_last - (char *) p) {
+        memset(p, PGB_SETPROCTITLE_PAD, pgb_os_argv_last - (char *) p);
+    }
+
+}
+u_char *
+pgb_cpystrn(u_char *dst, u_char *src, size_t n)
+{
+    if (n == 0) {
+        return dst;
+    }
+
+    while (--n) {
+        *dst = *src;
+
+        if (*dst == '\0') {
+            return dst;
+        }
+
+        dst++;
+        src++;
+    }
+
+    *dst = '\0';
+
+    return dst;
+}

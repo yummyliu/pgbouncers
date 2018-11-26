@@ -52,6 +52,10 @@ static void usage(int err, char *exe)
 struct DNSContext *adns;
 
 struct HBA *parsed_hba;
+char**    pgb_os_argv;
+int    pgb_argc;
+int ischild=0;
+
 
 /*
  * configuration storage
@@ -816,6 +820,15 @@ static void cleanup(void)
 	xfree((char **)&cf_syslog_facility);
 }
 
+static int
+pgb_save_argv(int argc, char *const *argv)
+{
+    pgb_os_argv = (char **) argv;
+    pgb_argc = strlen(argv[0]);
+
+    return 0;
+}
+
 /* boot everything */
 int main(int argc, char *argv[])
 {
@@ -835,8 +848,8 @@ int main(int argc, char *argv[])
 		{NULL, 0, NULL, 0}
 	};
 
+	pgb_save_argv(argc,argv);
 	setprogname(basename(argv[0]));
-
 	/* parse cmdline */
 	while ((c = getopt_long(argc, argv, "qvhdVRu:", long_options, &long_idx)) != -1) {
 		switch (c) {
@@ -918,6 +931,7 @@ int main(int argc, char *argv[])
 
 	/* initialize subsystems, order important */
 	srandom(time(NULL) ^ getpid());
+	/* Initialize libevent. */
 	if (!event_init())
 		fatal("event_init() failed");
 	dns_setup();
@@ -940,9 +954,12 @@ int main(int argc, char *argv[])
 		 tls_backend_version());
 
 	/* main loop */
-	while (cf_shutdown < 2)
-		main_loop_once();
-
+	if (cf_process_count == 1) {
+		while (cf_shutdown < 2)
+			main_loop_once();
+	} else {
+		pgb_master_loop();
+	}
 	/* not useful for production loads */
 	if (0) cleanup();
 

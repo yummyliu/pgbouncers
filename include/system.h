@@ -28,6 +28,9 @@
 #endif
 
 #include <sys/stat.h>
+#include <signal.h>
+#include <unistd.h>
+
 
 #include <stdarg.h>
 #include <limits.h>

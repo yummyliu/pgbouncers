@@ -23,6 +23,7 @@ pgbouncer_SOURCES = \
 	src/takeover.c \
 	src/util.c \
 	src/varcache.c \
+	src/process.c \
 	include/admin.h \
 	include/bouncer.h \
 	include/client.h \
@@ -42,6 +43,7 @@ pgbouncer_SOURCES = \
 	include/system.h \
 	include/takeover.h \
 	include/util.h \
+	include/process.h \
 	include/varcache.h
 
 pgbouncer_CPPFLAGS = -Iinclude $(CARES_CFLAGS) $(TLS_CPPFLAGS)

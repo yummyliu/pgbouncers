@@ -11,6 +11,9 @@
 ## -------------------- ##
 ## M4sh Initialization. ##
 ## -------------------- ##
+export LDFLAGS="-L/usr/local/opt/openssl/lib -L/usr/local/lib"
+export CFLAGS="-I/usr/local/opt/openssl/include/ -I/usr/local/include"
+export CPPFLAGS="-I/usr/local/opt/openssl/include/ -I/usr/local/include"
 
 # Be more Bourne compatible
 DUALCASE=1; export DUALCASE # for MKS sh

@@ -150,3 +150,14 @@ docker logs <your-pgbouncer-container-name>
 
 # debug
 docker run -d -p 6432:6432 --name pgbouncers -e DB_HOST=172.17.0.2 -e DB_USER=postgres -e DB_PASSWORD=123 pgbouncers:latest
+
+# Road Map
+
+1. message tool between dispatcher & worker
+
++ signal handler ;
++ message channel
+
+2. worker listen on random port
+
+3. dispatcher listen on configurable port, accepet TCP message and route to the 

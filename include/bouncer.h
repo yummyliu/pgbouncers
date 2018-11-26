@@ -107,6 +107,8 @@ extern int cf_sbuf_len;
 #include "hba.h"
 #include "pam.h"
 
+#include "process.h"
+
 /* to avoid allocations will use static buffers */
 #define MAX_DBNAME	64
 #define MAX_USERNAME	64
@@ -147,6 +149,9 @@ extern int cf_sbuf_len;
 /* buffer size for startup noise */
 #define STARTUP_BUF	1024
 
+/* return code*/
+#define PGB_ERROR -1
+#define PGB_OK 0
 
 /*
  * Remote/local address
@@ -412,6 +417,7 @@ extern int cf_max_user_connections;
 extern char * cf_autodb_connstr;
 extern usec_t cf_autodb_idle_timeout;
 
+extern int cf_process_count; /* process count of pgbouncer*/
 extern usec_t cf_suspend_timeout;
 extern usec_t cf_server_lifetime;
 extern usec_t cf_server_idle_timeout;
@@ -487,6 +493,10 @@ extern usec_t g_suspend_start;
 
 extern struct DNSContext *adns;
 extern struct HBA *parsed_hba;
+
+extern char**    pgb_os_argv;
+extern char      **pgb_argv;
+extern int    pgb_argc;
 
 static inline PgSocket * _MUSTCHECK
 pop_socket(struct StatList *slist)

@@ -55,6 +55,13 @@ void fill_local_addr(PgSocket *sk, int fd, bool is_unix);
 void rescue_timers(void);
 void safe_evtimer_add(struct event *ev, struct timeval *tv);
 
+#define PGB_SETPROCTITLE_PAD       ' '
+u_char *
+pgb_cpystrn(u_char *dst, u_char *src, size_t n);
+void
+pgb_setproctitle(const char *title);
+
+
 /* log truncated strings */
 #define safe_strcpy(dst, src, dstlen) do { \
 	size_t needed = strlcpy(dst, src, dstlen); \
