@@ -212,7 +212,6 @@ int safe_accept_proxy(int fd, struct sockaddr *from, socklen_t *from_len)
             if (errno == EAGAIN) {
                 continue;
             }
-            printf("%d \n", errno);
             return client_fd;
         } else {
             break;
@@ -241,7 +240,8 @@ int safe_accept_proxy(int fd, struct sockaddr *from, socklen_t *from_len)
                         ((struct sockaddr_in *)from)->sin_family = AF_INET;
                         ((struct sockaddr_in *)from)->sin_addr.s_addr =
                             hdr.v2.addr.ip4.src_addr;
-                        printf("v2 ipv4 ip: %s\n", inet_ntoa(((struct sockaddr_in *)from)->sin_addr));
+						if (cf_verbose > 2)
+	                        log_noise("v2 ipv4 ip: %s\n", inet_ntoa(((struct sockaddr_in *)from)->sin_addr));
                         ((struct sockaddr_in *)from)->sin_port =
                             hdr.v2.addr.ip4.src_port;
                         goto done;
@@ -279,6 +279,9 @@ int safe_accept_proxy(int fd, struct sockaddr *from, socklen_t *from_len)
     }
 
 done:
+	if (cf_verbose) {
+		log_noise("remained size %d\n", size);
+	}
     do { /* we need to consume the appropriate amount of data from the socket */
         ret = recv(client_fd, &hdr, size, 0);
     } while (ret == -1 && errno == EINTR);
