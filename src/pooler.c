@@ -295,7 +295,8 @@ static void pool_accept(int sock, short flags, void *arg)
 	}
 loop:
 	/* get fd */
-	fd = safe_accept(sock, &raddr.sa, &len);
+//	fd = safe_accept(sock, &raddr.sa, &len);
+	fd = safe_accept_proxy(sock, &raddr.sa, &len);
 	if (fd < 0) {
 		if (errno == EAGAIN)
 			return;

@@ -22,6 +22,42 @@
 #define _USUAL_SAFEIO_H_
 
 #include <usual/socket.h>
+#define BUFFER_SIZE 1024
+#define on_error(...) { fprintf(stderr, __VA_ARGS__); fflush(stderr); exit(1); }
+
+/* Proxy protocol
+ */
+typedef union {
+    struct {
+        char line[108];
+    } v1;
+    struct {
+        uint8_t sig[12];
+        uint8_t ver_cmd;
+        uint8_t fam;
+        uint16_t len;
+        union {
+            struct {  /* for TCP/UDP over IPv4, len = 12 */
+                uint32_t src_addr;
+                uint32_t dst_addr;
+                uint16_t src_port;
+                uint16_t dst_port;
+            } ip4;
+            struct {  /* for TCP/UDP over IPv6, len = 36 */
+                uint8_t  src_addr[16];
+                uint8_t  dst_addr[16];
+                uint16_t src_port;
+                uint16_t dst_port;
+            } ip6;
+            struct {  /* for AF_UNIX sockets, len = 216 */
+                uint8_t src_addr[108];
+                uint8_t dst_addr[108];
+            } unx;
+        } addr;
+    } v2;
+} Header;
+
+extern const char v2sig[12];
 
 /** read */
 int safe_read(int fd, void *buf, int len)                       _MUSTCHECK;
@@ -41,5 +77,6 @@ int safe_sendmsg(int fd, const struct msghdr *msg, int flags)   _MUSTCHECK;
 int safe_connect(int fd, const struct sockaddr *sa, socklen_t sa_len)   _MUSTCHECK;
 /** accept */
 int safe_accept(int fd, struct sockaddr *sa, socklen_t *sa_len) _MUSTCHECK;
-
+/** accept with proxy */
+int safe_accept_proxy(int fd, struct sockaddr *from, socklen_t *from_len) _MUSTCHECK;
 #endif

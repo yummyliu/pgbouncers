@@ -28,6 +28,8 @@
 #include <usual/string.h>
 #include <usual/time.h>
 
+const char v2sig[12] = "\x0D\x0A\x0D\x0A\x00\x0D\x0A\x51\x55\x49\x54\x0A";
+
 int safe_read(int fd, void *buf, int len)
 {
 	int res;
@@ -195,3 +197,90 @@ loop:
 	return res;
 }
 
+/* returns
+ * =0 if needs to poll
+ * <0 upon error
+ * >0 if it did the job
+ */
+int safe_accept_proxy(int fd, struct sockaddr *from, socklen_t *from_len)
+{
+    // get one connection
+    int client_fd = -1;
+    while (1) {
+        client_fd = accept(fd, from, from_len);
+        if (client_fd <= 0) {
+            if (errno == EAGAIN) {
+                continue;
+            }
+            printf("%d \n", errno);
+            return client_fd;
+        } else {
+            break;
+        }
+    }
+
+    Header hdr;
+    int size, ret;
+    do {
+        ret = recv(client_fd, &hdr, sizeof(hdr), MSG_PEEK);
+    } while (ret == -1 && errno == EINTR);
+
+    if (ret == -1)
+        return (errno == EAGAIN) ? 0 : -1;
+
+    if (ret >= 16 && memcmp(&hdr.v2, v2sig, 12) == 0 &&
+            (hdr.v2.ver_cmd & 0xF0) == 0x20) {
+        size = 16 + ntohs(hdr.v2.len);
+        if (ret < size)
+            return -1; /* truncated or too large header */
+
+        switch (hdr.v2.ver_cmd & 0xF) {
+            case 0x01: /* PROXY command */
+                switch (hdr.v2.fam) {
+                    case 0x11:  /* TCPv4 */
+                        ((struct sockaddr_in *)from)->sin_family = AF_INET;
+                        ((struct sockaddr_in *)from)->sin_addr.s_addr =
+                            hdr.v2.addr.ip4.src_addr;
+                        printf("v2 ipv4 ip: %s\n", inet_ntoa(((struct sockaddr_in *)from)->sin_addr));
+                        ((struct sockaddr_in *)from)->sin_port =
+                            hdr.v2.addr.ip4.src_port;
+                        goto done;
+                    case 0x21:  /* TCPv6 */
+                        ((struct sockaddr_in6 *)from)->sin6_family = AF_INET6;
+                        memcpy(&((struct sockaddr_in6 *)from)->sin6_addr,
+                                hdr.v2.addr.ip6.src_addr, 16);
+                        ((struct sockaddr_in6 *)from)->sin6_port =
+                            hdr.v2.addr.ip6.src_port;
+                        goto done;
+                }
+                /* unsupported protocol, keep local connection address */
+                break;
+            case 0x00: /* LOCAL command */
+                /* keep local connection address for LOCAL */
+                printf("v2 local\n");
+                break;
+            default:
+                printf("default\n");
+                return -1; /* not a supported command */
+        }
+    }
+    else if (ret >= 8 && memcmp(hdr.v1.line, "PROXY", 5) == 0) {
+        char *end = (char*)memchr(hdr.v1.line, '\r', ret - 1);
+        if (!end || end[1] != '\n')
+            return -1; /* partial or invalid header */
+        *end = '\0'; /* terminate the string to ease parsing */
+        size = end + 2 - hdr.v1.line; /* skip header + CRLF */
+        /* parse the V1 header using favorite address parsers like inet_pton.
+         * return -1 upon error, or simply fall through to accept.
+         */
+    }
+    else {/* Wrong protocol */
+        return -1;
+    }
+
+done:
+    do { /* we need to consume the appropriate amount of data from the socket */
+        ret = recv(client_fd, &hdr, size, 0);
+    } while (ret == -1 && errno == EINTR);
+    return (ret >= 0) ? client_fd : -1;
+}
