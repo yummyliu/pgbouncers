@@ -204,22 +204,25 @@ loop:
  */
 int safe_accept_proxy(int fd, struct sockaddr *from, socklen_t *from_len)
 {
-    // get one connection
-    int client_fd = -1;
-    while (1) {
-        client_fd = accept(fd, from, from_len);
-        if (client_fd <= 0) {
-            if (errno == EAGAIN) {
-                continue;
-            }
-            return client_fd;
-        } else {
-            break;
-        }
+    Header hdr;
+    int size=0, ret=-1;
+
+	char ebuf[128];
+	char buf[128];
+    int client_fd;
+loop:
+    client_fd = accept(fd, from, from_len);
+    if (client_fd < 0 && errno == EINTR) {
+        goto loop;
+    }
+    if (client_fd < 0) {
+        log_noise("safe_accept_proxy(%d) = %s", fd, strerror_r(errno, ebuf, sizeof(ebuf)));
+        return client_fd;
     }
 
-    Header hdr;
-    int size, ret;
+    if (cf_verbose > 2)
+        log_noise("safe_accept_proxy(%d) = %d (%s)", fd, client_fd, sa2str(from, buf, sizeof(buf)));
+
     do {
         ret = recv(client_fd, &hdr, sizeof(hdr), MSG_PEEK);
     } while (ret == -1 && errno == EINTR);
@@ -238,12 +241,10 @@ int safe_accept_proxy(int fd, struct sockaddr *from, socklen_t *from_len)
                 switch (hdr.v2.fam) {
                     case 0x11:  /* TCPv4 */
                         ((struct sockaddr_in *)from)->sin_family = AF_INET;
-                        ((struct sockaddr_in *)from)->sin_addr.s_addr =
-                            hdr.v2.addr.ip4.src_addr;
-						if (cf_verbose > 2)
-	                        log_noise("v2 ipv4 ip: %s\n", inet_ntoa(((struct sockaddr_in *)from)->sin_addr));
-                        ((struct sockaddr_in *)from)->sin_port =
-                            hdr.v2.addr.ip4.src_port;
+                        ((struct sockaddr_in *)from)->sin_addr.s_addr = hdr.v2.addr.ip4.src_addr;
+                        ((struct sockaddr_in *)from)->sin_port = hdr.v2.addr.ip4.src_port;
+
+                        log_info("proxy v2 ipv4 ip (%s)", sa2str(from, buf, sizeof(buf)));
                         goto done;
                     case 0x21:  /* TCPv6 */
                         ((struct sockaddr_in6 *)from)->sin6_family = AF_INET6;
@@ -253,14 +254,12 @@ int safe_accept_proxy(int fd, struct sockaddr *from, socklen_t *from_len)
                             hdr.v2.addr.ip6.src_port;
                         goto done;
                 }
-                /* unsupported protocol, keep local connection address */
                 break;
             case 0x00: /* LOCAL command */
-                /* keep local connection address for LOCAL */
-                printf("v2 local\n");
+                log_noise("v2 local\n");
                 break;
             default:
-                printf("default\n");
+                log_noise("default\n");
                 return -1; /* not a supported command */
         }
     }
@@ -279,8 +278,8 @@ int safe_accept_proxy(int fd, struct sockaddr *from, socklen_t *from_len)
     }
 
 done:
-	if (cf_verbose) {
-		log_noise("remained size %d\n", size);
+	if (cf_verbose > 2) {
+		log_info("remained size %d", size);
 	}
     do { /* we need to consume the appropriate amount of data from the socket */
         ret = recv(client_fd, &hdr, size, 0);

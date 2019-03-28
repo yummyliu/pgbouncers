@@ -7,16 +7,16 @@ PACKAGE_BUGREPORT =
 PORTNAME = unix
 EXEEXT = 
 HAVE_CC_DEPFLAG = yes
-CC = gcc
-CPP = gcc -E
-CPPFLAGS = -I/usr/local/opt/openssl/include/ -I/usr/local/include
-CFLAGS = -g -I/usr/local/opt/openssl/include/ -I/usr/local/include
+CC = gcc -std=gnu99
+CPP = gcc -std=gnu99 -E
+CPPFLAGS = 
+CFLAGS = -g -O2
 DEFS = -DHAVE_CONFIG_H
 WFLAGS =  -Wall -Wextra -Wno-unused-parameter -Wno-missing-field-initializers -Wmissing-prototypes -Wpointer-arith -Wendif-labels -Wdeclaration-after-statement -Wold-style-definition -Wstrict-prototypes -Wundef -Wformat=2 -Wuninitialized
 CXX = @CXX@
 CXXFLAGS = @CXXFLAGS@
 LD = @LD@
-LDFLAGS = -g -L/usr/local/opt/openssl/lib -L/usr/local/lib
+LDFLAGS = -g  -Wl,--as-needed
 LIBS = -levent 
 AR = ar
 ARFLAGS = rcu
@@ -26,9 +26,9 @@ INSTALL = /usr/bin/install -c
 INSTALL_PROGRAM = ${INSTALL}
 INSTALL_SCRIPT = ${INSTALL}
 INSTALL_DATA = ${INSTALL} -m 644
-MKDIR_P = /Users/liuyangming/src/pgbouncers/./install-sh -c -d
+MKDIR_P = /usr/bin/mkdir -p
 SED = /usr/bin/sed
-AWK = awk
+AWK = gawk
 GREP = /usr/bin/grep
 EGREP = /usr/bin/grep -E
 STRIP = strip
@@ -47,13 +47,13 @@ libdir = ${exec_prefix}/lib
 localedir = ${datarootdir}/locale
 pkgdatadir = ${datarootdir}/pgbouncer
 pkgconfigdir = ${libdir}/pkgconfig
-abs_top_srcdir ?= /Users/liuyangming/src/pgbouncers
-abs_top_builddir ?= /Users/liuyangming/src/pgbouncers
+abs_top_srcdir ?= /home/liuyangming/pgbouncers
+abs_top_builddir ?= /home/liuyangming/pgbouncers
 nosub_top_srcdir ?= .
 nosub_top_builddir ?= .
 
-CARES_CFLAGS = -I/usr/local/Cellar/c-ares/1.15.0/include
-CARES_LIBS = -L/usr/local/Cellar/c-ares/1.15.0/lib -lcares
+CARES_CFLAGS =  
+CARES_LIBS = -lcares  
 
 TLS_CPPFLAGS = 
 TLS_LDFLAGS = 

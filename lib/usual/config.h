@@ -8,7 +8,7 @@
 /* #undef CASSERT */
 
 /* Define to 1 if you have the `arc4random_buf' function. */
-#define HAVE_ARC4RANDOM_BUF 1
+/* #undef HAVE_ARC4RANDOM_BUF */
 
 /* Define to 1 if you have the `ares_parse_soa_reply' function. */
 #define HAVE_ARES_PARSE_SOA_REPLY 1
@@ -23,7 +23,7 @@
 #define HAVE_ASPRINTF 1
 
 /* Define to 1 if you have the <byteswap.h> header file. */
-/* #undef HAVE_BYTESWAP_H */
+#define HAVE_BYTESWAP_H 1
 
 /* Define to 1 if you have the declaration of `strerror_r', and to 0 if you
    don't. */
@@ -36,7 +36,7 @@
 /* #undef HAVE_ENCDEC_FUNCS */
 
 /* Define to 1 if you have the <endian.h> header file. */
-/* #undef HAVE_ENDIAN_H */
+#define HAVE_ENDIAN_H 1
 
 /* Define to 1 if you have the `err' function. */
 #define HAVE_ERR 1
@@ -69,13 +69,13 @@
 #define HAVE_FFSLL 1
 
 /* Define to 1 if you have the `fls' function. */
-#define HAVE_FLS 1
+/* #undef HAVE_FLS */
 
 /* Define to 1 if you have the `flsl' function. */
-#define HAVE_FLSL 1
+/* #undef HAVE_FLSL */
 
 /* Define to 1 if you have the `flsll' function. */
-#define HAVE_FLSLL 1
+/* #undef HAVE_FLSLL */
 
 /* Define to 1 if you have the `fnmatch' function. */
 #define HAVE_FNMATCH 1
@@ -90,7 +90,7 @@
 /* #undef HAVE_GETADDRINFO_A */
 
 /* Define to 1 if you have the `getentropy' function. */
-#define HAVE_GETENTROPY 1
+/* #undef HAVE_GETENTROPY */
 
 /* Define to 1 if you have the `getline' function. */
 #define HAVE_GETLINE 1
@@ -108,13 +108,13 @@
 #define HAVE_GETOPT_LONG_ONLY 1
 
 /* Define to 1 if you have the `getpeereid' function. */
-#define HAVE_GETPEEREID 1
+/* #undef HAVE_GETPEEREID */
 
 /* Define to 1 if you have the `getpeerucred' function. */
 /* #undef HAVE_GETPEERUCRED */
 
 /* Define to 1 if you have the `getprogname' function. */
-#define HAVE_GETPROGNAME 1
+/* #undef HAVE_GETPROGNAME */
 
 /* Define to 1 if you have the `getrandom' function. */
 /* #undef HAVE_GETRANDOM */
@@ -144,7 +144,7 @@
 #define HAVE_LIBEVENT 1
 
 /* Define to 1 if you have the <linux/random.h> header file. */
-/* #undef HAVE_LINUX_RANDOM_H */
+#define HAVE_LINUX_RANDOM_H 1
 
 /* Define to 1 if you have the `localtime_r' function. */
 #define HAVE_LOCALTIME_R 1
@@ -153,13 +153,13 @@
 #define HAVE_LSTAT 1
 
 /* Define to 1 if you have the <malloc.h> header file. */
-/* #undef HAVE_MALLOC_H */
+#define HAVE_MALLOC_H 1
 
 /* Define to 1 if you have the `mbsnrtowcs' function. */
 #define HAVE_MBSNRTOWCS 1
 
 /* Define to 1 if you have the `memalign' function. */
-/* #undef HAVE_MEMALIGN */
+#define HAVE_MEMALIGN 1
 
 /* Define to 1 if you have the `memmem' function. */
 #define HAVE_MEMMEM 1
@@ -168,13 +168,13 @@
 #define HAVE_MEMORY_H 1
 
 /* Define to 1 if you have the `mempcpy' function. */
-/* #undef HAVE_MEMPCPY */
+#define HAVE_MEMPCPY 1
 
 /* Define to 1 if you have the `memrchr' function. */
-/* #undef HAVE_MEMRCHR */
+#define HAVE_MEMRCHR 1
 
 /* Define to 1 if you have the `memset_s' function. */
-#define HAVE_MEMSET_S 1
+/* #undef HAVE_MEMSET_S */
 
 /* Define to 1 if you have the `mmap' function. */
 #define HAVE_MMAP 1
@@ -231,13 +231,13 @@
 #define HAVE_SENDMSG 1
 
 /* Define to 1 if you have the `setprogname' function. */
-#define HAVE_SETPROGNAME 1
+/* #undef HAVE_SETPROGNAME */
 
 /* Define to 1 if you have the `sigaction' function. */
 #define HAVE_SIGACTION 1
 
 /* Define to 1 if you have the `sigqueue' function. */
-/* #undef HAVE_SIGQUEUE */
+#define HAVE_SIGQUEUE 1
 
 /* Define to 1 if you have the `SSL_CTX_load_verify_mem' function. */
 /* #undef HAVE_SSL_CTX_LOAD_VERIFY_MEM */
@@ -265,10 +265,10 @@
 #define HAVE_STRING_H 1
 
 /* Define to 1 if you have the `strlcat' function. */
-#define HAVE_STRLCAT 1
+/* #undef HAVE_STRLCAT */
 
 /* Define to 1 if you have the `strlcpy' function. */
-#define HAVE_STRLCPY 1
+/* #undef HAVE_STRLCPY */
 
 /* Define to 1 if you have the `strnlen' function. */
 #define HAVE_STRNLEN 1
@@ -316,7 +316,7 @@
 #define HAVE_SYS_TYPES_H 1
 
 /* Define to 1 if you have the <sys/ucred.h> header file. */
-#define HAVE_SYS_UCRED_H 1
+/* #undef HAVE_SYS_UCRED_H */
 
 /* Define to 1 if you have the <sys/uio.h> header file. */
 #define HAVE_SYS_UIO_H 1
@@ -380,7 +380,7 @@
 #define STDC_HEADERS 1
 
 /* Define to 1 if strerror_r returns char *. */
-/* #undef STRERROR_R_CHAR_P */
+#define STRERROR_R_CHAR_P 1
 
 /* Use c-ares for name resolution. */
 #define USE_CARES 1

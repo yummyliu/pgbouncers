@@ -297,6 +297,10 @@ loop:
 	/* get fd */
 //	fd = safe_accept(sock, &raddr.sa, &len);
 	fd = safe_accept_proxy(sock, &raddr.sa, &len);
+	log_info("accept from : %s", inet_ntoa(((struct sockaddr_in *)&raddr.sa)->sin_addr));
+    struct sockaddr dst;
+    getpeername(fd, &dst, &len);
+	log_info("getpeername: %s", inet_ntoa(((struct sockaddr_in *)&dst)->sin_addr));
 	if (fd < 0) {
 		if (errno == EAGAIN)
 			return;
@@ -318,7 +322,9 @@ loop:
 	if (is_unix) {
 		client = accept_client(fd, true);
 	} else {
+//		client = accept_client_proxy(fd, false, &raddr.sa);
 		client = accept_client(fd, false);
+        client->remote_addr.sa = raddr.sa;
 	}
 
 	if (client)
