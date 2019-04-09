@@ -7,8 +7,8 @@ PACKAGE_BUGREPORT =
 PORTNAME = unix
 EXEEXT = 
 HAVE_CC_DEPFLAG = yes
-CC = gcc -std=gnu99
-CPP = gcc -std=gnu99 -E
+CC = gcc
+CPP = gcc -E
 CPPFLAGS = 
 CFLAGS = -g -O2
 DEFS = -DHAVE_CONFIG_H
@@ -16,7 +16,7 @@ WFLAGS =  -Wall -Wextra -Wno-unused-parameter -Wno-missing-field-initializers -W
 CXX = @CXX@
 CXXFLAGS = @CXXFLAGS@
 LD = @LD@
-LDFLAGS = -g  -Wl,--as-needed
+LDFLAGS = -g 
 LIBS = -levent 
 AR = ar
 ARFLAGS = rcu
@@ -26,9 +26,9 @@ INSTALL = /usr/bin/install -c
 INSTALL_PROGRAM = ${INSTALL}
 INSTALL_SCRIPT = ${INSTALL}
 INSTALL_DATA = ${INSTALL} -m 644
-MKDIR_P = /usr/bin/mkdir -p
+MKDIR_P = /Users/liuyangming/src/pgbouncers/./install-sh -c -d
 SED = /usr/bin/sed
-AWK = gawk
+AWK = awk
 GREP = /usr/bin/grep
 EGREP = /usr/bin/grep -E
 STRIP = strip
@@ -47,16 +47,16 @@ libdir = ${exec_prefix}/lib
 localedir = ${datarootdir}/locale
 pkgdatadir = ${datarootdir}/pgbouncer
 pkgconfigdir = ${libdir}/pkgconfig
-abs_top_srcdir ?= /home/liuyangming/pgbouncers
-abs_top_builddir ?= /home/liuyangming/pgbouncers
+abs_top_srcdir ?= /Users/liuyangming/src/pgbouncers
+abs_top_builddir ?= /Users/liuyangming/src/pgbouncers
 nosub_top_srcdir ?= .
 nosub_top_builddir ?= .
 
-CARES_CFLAGS =  
-CARES_LIBS = -lcares  
+CARES_CFLAGS = -I/usr/local/Cellar/c-ares/1.15.0/include
+CARES_LIBS = -L/usr/local/Cellar/c-ares/1.15.0/lib -lcares
 
-TLS_CPPFLAGS = 
-TLS_LDFLAGS = 
+TLS_CPPFLAGS = -I/usr/local/Cellar/openssl/1.0.2q//include
+TLS_LDFLAGS = -L/usr/local/Cellar/openssl/1.0.2q//lib
 TLS_LIBS = -lssl -lcrypto
 
 RST2MAN = rst2man
