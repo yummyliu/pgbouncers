@@ -293,23 +293,23 @@ static void pool_accept(int sock, short flags, void *arg)
 		log_warning("No EV_READ in pool_accept");
 		return;
 	}
+
+	log_info("pool_accept, listen fd:%d\n", sock);
 loop:
-	/* get fd */
-//	fd = safe_accept(sock, &raddr.sa, &len);
-	fd = safe_accept_proxy(sock, &raddr.sa, &len);
-	log_info("accept from : %s", inet_ntoa(((struct sockaddr_in *)&raddr.sa)->sin_addr));
-    struct sockaddr dst;
-    getpeername(fd, &dst, &len);
-	log_info("getpeername: %s", inet_ntoa(((struct sockaddr_in *)&dst)->sin_addr));
+	if (cf_ha_proxy) {
+		fd = safe_accept_proxy(sock, &raddr.sa, &len);
+	} else {
+		fd = safe_accept(sock, &raddr.sa, &len);
+	}
+
 	if (fd < 0) {
-		if (errno == EAGAIN)
+		if (errno == EAGAIN) {
+			log_info("EAGAIN(%d) ", fd);
 			return;
-		else if (errno == ECONNABORTED)
+		} else if (errno == ECONNABORTED)
 			return;
 
-		/*
-		 * probably fd limit, pointless to try often
-		 * wait a bit, hope that admin resolves somehow
+		/* probably fd limit, pointless to try often wait a bit, hope that admin resolves somehow
 		 */
 		log_error("accept() failed: %s", strerror(errno));
 		evtimer_set(&ev_err, err_wait_func, NULL);
@@ -318,11 +318,9 @@ loop:
 		return;
 	}
 
-	log_noise("new fd from accept=%d", fd);
 	if (is_unix) {
 		client = accept_client(fd, true);
 	} else {
-//		client = accept_client_proxy(fd, false, &raddr.sa);
 		client = accept_client(fd, false);
         client->remote_addr.sa = raddr.sa;
 	}
@@ -330,8 +328,7 @@ loop:
 	if (client)
 		slog_debug(client, "P: got connection: %s", conninfo(client));
 
-	/*
-	 * there may be several clients waiting,
+	/* there may be several clients waiting,
 	 * avoid context switch by looping
 	 */
 	goto loop;

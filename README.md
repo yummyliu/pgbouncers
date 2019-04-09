@@ -1,6 +1,10 @@
 # PgBouncers
 fork from https://github.com/pgbouncer/pgbouncer, and add haproxy support, in the future maybe turn to multiprocess dbpool。
 
+```
+PROXY_STRING + single space + INET_PROTOCOL + single space + CLIENT_IP + single space + PROXY_IP + single space + CLIENT_PORT + single space + PROXY_PORT + "\r\n"
+```
+
 ## Building
 
 PgBouncer depends on few things to get compiled:

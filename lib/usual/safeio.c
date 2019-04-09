@@ -190,18 +190,12 @@ loop:
 	if (res < 0 && errno == EINTR)
 		goto loop;
 	if (res < 0)
-		log_noise("safe_accept(%d) = %s", fd,
-			  strerror_r(errno, ebuf, sizeof(ebuf)));
+		log_info("safe_accept(%d) = %s", fd, strerror_r(errno, ebuf, sizeof(ebuf)));
 	else if (cf_verbose > 2)
-		log_noise("safe_accept(%d) = %d (%s)", fd, res, sa2str(sa, buf, sizeof(buf)));
+		log_info("safe_accept(%d) = %d (%s)", fd, res, sa2str(sa, buf, sizeof(buf)));
 	return res;
 }
 
-/* returns
- * =0 if needs to poll
- * <0 upon error
- * >0 if it did the job
- */
 int safe_accept_proxy(int fd, struct sockaddr *from, socklen_t *from_len)
 {
     Header hdr;
@@ -216,64 +210,64 @@ loop:
         goto loop;
     }
     if (client_fd < 0) {
-        log_noise("safe_accept_proxy(%d) = %s", fd, strerror_r(errno, ebuf, sizeof(ebuf)));
+        log_info("safe_accept_proxy(%d) = %s", fd, strerror_r(errno, ebuf, sizeof(ebuf)));
         return client_fd;
     }
+	else if (cf_verbose > 2)
+		log_info("safe_accept_proxy(%d) = %d (%s)", fd, client_fd, sa2str(from, buf, sizeof(buf)));
 
-    if (cf_verbose > 2)
-        log_noise("safe_accept_proxy(%d) = %d (%s)", fd, client_fd, sa2str(from, buf, sizeof(buf)));
+getproxyinfo:
+    ret = safe_recv(client_fd, &hdr, sizeof(hdr), MSG_PEEK);
+    if (ret < 0 && errno == EAGAIN)
+		goto getproxyinfo;
 
-    do {
-        ret = recv(client_fd, &hdr, sizeof(hdr), MSG_PEEK);
-    } while (ret == -1 && errno == EINTR);
-
-    if (ret == -1)
-        return (errno == EAGAIN) ? 0 : -1;
-
-    if (ret >= 16 && memcmp(&hdr.v2, v2sig, 12) == 0 &&
-            (hdr.v2.ver_cmd & 0xF0) == 0x20) {
+    if (ret >= 16
+		&& memcmp(&hdr.v2, v2sig, 12) == 0
+		&& (hdr.v2.ver_cmd & 0xF0) == 0x20) {
         size = 16 + ntohs(hdr.v2.len);
         if (ret < size)
             return -1; /* truncated or too large header */
 
         switch (hdr.v2.ver_cmd & 0xF) {
-            case 0x01: /* PROXY command */
+            case 0x01:
                 switch (hdr.v2.fam) {
-                    case 0x11:  /* TCPv4 */
+                    case 0x11:
                         ((struct sockaddr_in *)from)->sin_family = AF_INET;
                         ((struct sockaddr_in *)from)->sin_addr.s_addr = hdr.v2.addr.ip4.src_addr;
                         ((struct sockaddr_in *)from)->sin_port = hdr.v2.addr.ip4.src_port;
 
-                        log_info("proxy v2 ipv4 ip (%s)", sa2str(from, buf, sizeof(buf)));
+                        log_info("HAProxyV2_ipv4: (%s)", sa2str(from, buf, sizeof(buf)));
                         goto done;
-                    case 0x21:  /* TCPv6 */
+                    case 0x21:
                         ((struct sockaddr_in6 *)from)->sin6_family = AF_INET6;
-                        memcpy(&((struct sockaddr_in6 *)from)->sin6_addr,
-                                hdr.v2.addr.ip6.src_addr, 16);
-                        ((struct sockaddr_in6 *)from)->sin6_port =
-                            hdr.v2.addr.ip6.src_port;
+                        memcpy(&((struct sockaddr_in6 *)from)->sin6_addr, hdr.v2.addr.ip6.src_addr, 16);
+                        ((struct sockaddr_in6 *)from)->sin6_port = hdr.v2.addr.ip6.src_port;
+
+                        log_info("HAProxyV2_ipv6: (%s)", sa2str(from, buf, sizeof(buf)));
                         goto done;
                 }
                 break;
-            case 0x00: /* LOCAL command */
-                log_noise("v2 local\n");
+            case 0x00:
+                log_info("V2 local\n");
                 break;
             default:
-                log_noise("default\n");
-                return -1; /* not a supported command */
+                log_error("Unsupported HAproxy Command\n");
+                return -1;
         }
     }
     else if (ret >= 8 && memcmp(hdr.v1.line, "PROXY", 5) == 0) {
         char *end = (char*)memchr(hdr.v1.line, '\r', ret - 1);
         if (!end || end[1] != '\n')
             return -1; /* partial or invalid header */
+
         *end = '\0'; /* terminate the string to ease parsing */
         size = end + 2 - hdr.v1.line; /* skip header + CRLF */
         /* parse the V1 header using favorite address parsers like inet_pton.
          * return -1 upon error, or simply fall through to accept.
          */
+		log_info("HAProxyV1: (%s)", end);
     }
-    else {/* Wrong protocol */
+    else {
         return -1;
     }
 
@@ -281,8 +275,7 @@ done:
 	if (cf_verbose > 2) {
 		log_info("remained size %d", size);
 	}
-    do { /* we need to consume the appropriate amount of data from the socket */
-        ret = recv(client_fd, &hdr, size, 0);
-    } while (ret == -1 && errno == EINTR);
+
+    ret = safe_recv(client_fd, &hdr, size, 0);
     return (ret >= 0) ? client_fd : -1;
 }

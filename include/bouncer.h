@@ -417,7 +417,9 @@ extern int cf_max_user_connections;
 extern char * cf_autodb_connstr;
 extern usec_t cf_autodb_idle_timeout;
 
-extern int cf_process_count; /* process count of pgbouncer*/
+extern int cf_process_count;
+extern int cf_ha_proxy;
+
 extern usec_t cf_suspend_timeout;
 extern usec_t cf_server_lifetime;
 extern usec_t cf_server_idle_timeout;
